@@ -1,12 +1,21 @@
 package com.example.uitest
 
 import android.content.Context
+import android.text.Editable
 import android.text.TextUtils
+import android.text.TextWatcher
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
+import com.example.uitest.dslTest.TextWatcherDslImpl
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -32,6 +41,12 @@ fun Float.dp2Px():Int{
 }
 
 
+fun String.name(){
+
+}
+
+
+
 var mToast:Toast? = null
 
 fun String.toast(){
@@ -39,6 +54,11 @@ fun String.toast(){
     mToast?.setText(this)
     mToast?.show()
     Log.d("toast","toast:${mToast}")
+}
+
+
+fun String.logD(tag:String = ""){
+    Log.d(tag,this)
 }
 
 fun String.showSnackbar(view:View){
@@ -63,12 +83,14 @@ public fun main(args:Array<String>){
 }
 
 
-private fun testLet() {
+fun testLet() {
     val letVal = Person1().let {
         it.mFood = "好吃的"
         it
     }
     letVal.eat()
+
+
 
 
     val withVal = with(Person1(),{
@@ -212,3 +234,65 @@ data class Person(var name:String,var age:Int){
         return "${name}${age}"
     }
 }
+
+
+
+fun TextView.addTextChangedListenerDsl(process: TextWatcherDslImpl.() -> Unit) {
+    val listener = TextWatcherDslImpl()
+    listener.process()
+    this.addTextChangedListener(listener)
+}
+
+
+fun EditText.textChangeFlow(): Flow<CharSequence?> = callbackFlow {
+    val watch = object :TextWatcher{
+        override fun afterTextChanged(s: Editable?) {
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
+        override fun onTextChanged(data: CharSequence?, start: Int, before: Int, count: Int) {
+            offer(data)
+        }
+
+    }
+    addTextChangedListener(watch)
+    awaitClose{
+        removeTextChangedListener(watch)
+    }
+
+}
+
+fun View.setOnDebounceClick(block:(View)->Unit){
+    setOnClickListener{
+        if (!it.isFastClick()){
+            block(this)
+        }
+    }
+}
+
+
+
+
+
+fun View.isFastClick():Boolean{
+    val curTime = System.currentTimeMillis();
+    if (curTime - this.triggerTime >= 300) {
+        this.triggerTime = curTime
+        return false
+    } else {
+        return true
+    }
+}
+
+
+private var View.triggerTime : Long
+    set(value) = setTag(R.string.track_time,value)
+    get() {
+        return getTag(R.string.track_time) as? Long ?: 0L
+    }
+
+
+
+

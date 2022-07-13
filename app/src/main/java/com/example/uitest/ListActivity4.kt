@@ -1,12 +1,17 @@
 package com.example.uitest
 
+import android.app.Activity
 import android.graphics.*
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.takeWhile
 
 /**
  * 列表上下带有透明度的列表
@@ -24,20 +29,23 @@ class ListActivity4 : AppCompatActivity() {
             list.add(index)
         }
         adapter = ListAdapter(list)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL,false)
-        recyclerView.addItemDecoration(itemDecoration)
-        adapter.notifyDataSetChanged()
+        recyclerView.apply {
+            this.adapter = adapter
+            LinearLayoutManager(context, RecyclerView.VERTICAL,false).also { this.layoutManager = it }
+            this.addItemDecoration(itemDecoration)
+            recyclerView
+        }
 
+        adapter.notifyDataSetChanged()
+        var handle = Handler()
     }
 
-    var layerId = 0;
     var mPaint = Paint()
     var linearGradient:LinearGradient? = null
     var recycleViewfirstComeInFlag:Boolean = false;
 
     private val itemDecoration = object :RecyclerView.ItemDecoration() {
-
+        var layerId = 0;
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
             super.onDraw(c, parent, state)
@@ -73,5 +81,19 @@ class ListActivity4 : AppCompatActivity() {
 
 
     };
+
+
+    private fun test(){
+         val flow = flow<String> {
+            emit("1231")
+
+        }.takeWhile {
+            true
+         }
+
+
+
+
+    }
 
 }

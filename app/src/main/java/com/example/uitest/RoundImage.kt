@@ -6,10 +6,9 @@ import android.util.AttributeSet
 import android.view.View
 
 
-class RoundImage constructor (contex:Context,att:AttributeSet,def:Int = 0) : View(contex,att,def) {
+class RoundImage : View{
 
-
-
+    constructor(contex:Context,att:AttributeSet,def:Int = 0):super(contex,att,def)
 
    val mSrc = BitmapFactory.decodeResource(resources,R.mipmap.ic_launcher)
     val  meinvImg = BitmapFactory.decodeResource(resources,R.mipmap.meinv)

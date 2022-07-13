@@ -18,7 +18,7 @@ import android.view.animation.LinearInterpolator
 
 class WaveLayout:View {
 
-    val Msg = 1001
+    val INVALIDATE_MSG = 1001
     var widh = 0;
     val minWidth = 1f.dp2Px();
     var halfWidth = 0f;
@@ -31,7 +31,7 @@ class WaveLayout:View {
     val handle = object : Handler(Looper.getMainLooper()){
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
-            if (msg.what == Msg){
+            if (msg.what == INVALIDATE_MSG){
                 invalidate()
             }
         }

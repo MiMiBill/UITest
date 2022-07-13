@@ -1,46 +1,46 @@
 package com.example.uitest
 
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.media.Image
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.TextUtils
+import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.ViewConfiguration
+import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RequiresApi
-import androidx.core.view.ViewConfigurationCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.*
 import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.Request
 import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.BitmapImageViewTarget
-import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.target.DrawableImageViewTarget
 import com.bumptech.glide.request.target.Target
 import com.example.uitest.resultapi.CustomActivityResultContract
 import io.reactivex.rxjava3.core.*
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consume
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.*
 import okhttp3.*
-import java.io.FileNotFoundException
+import okhttp3.internal.immutableListOf
+import java.io.File
 import java.io.IOException
 import java.lang.ref.ReferenceQueue
-import java.lang.ref.SoftReference
-import java.lang.ref.WeakReference
-import java.net.UnknownHostException
-import java.util.function.Consumer
+import java.util.*
+import kotlin.concurrent.thread
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 
 class MainActivity : AppCompatActivity() {
@@ -49,13 +49,15 @@ class MainActivity : AppCompatActivity() {
     lateinit var imageVIew:ImageView
     lateinit var ivSceenCap:ImageView
     lateinit var moon:MyMoon
+    private val handle = Handler(Looper.myLooper()!!)
+    val scope = CoroutineScope(Dispatchers.Main);
     lateinit var activityResultLauncher:ActivityResultLauncher<String>
     var p :Person1? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         imageVIew = findViewById(R.id.iv_imageview)
-        val scope = CoroutineScope(Dispatchers.Main);
+
         ivSceenCap = findViewById(R.id.iv_sceenCap)
         moon = findViewById(R.id.moon)
         findViewById<View>(R.id.toList).setOnClickListener {
@@ -97,6 +99,7 @@ class MainActivity : AppCompatActivity() {
             }
             is Sex.Woman -> "woman"
         }
+
         Log.d("MainActivity", "sex:" + s)
 
         val person = Person("long",18).apply { name = "wang"
@@ -108,7 +111,6 @@ class MainActivity : AppCompatActivity() {
         val str:Person = person.let { name = ""
             it
         }
-
 
 
         val (name,age) = person
@@ -126,6 +128,10 @@ class MainActivity : AppCompatActivity() {
             startResultActivity()
         }
 
+        ivSceenCap.setOnDebounceClick {
+
+        }
+
         testGlide()
         testOkhttp()
         testWeakrefrence()
@@ -136,6 +142,343 @@ class MainActivity : AppCompatActivity() {
         testTap()
         testSp()
         initResultApi()
+        initDsl();
+        testLiveData();
+        scope.launch {
+            testFlow();
+        }
+        testCoroutineScope()
+
+        val thread = thread(start = true) {
+            Log.d("testFlow","thread run")
+            val ee = 1/0;
+
+        }
+        thread.setUncaughtExceptionHandler { t, e ->
+            Log.d("testFlow","thread:" + e.message )
+        }
+
+        testChannel();
+        getMemoryInfo(this)
+    }
+
+
+    fun getMemoryInfo(context: Context) {
+        try {
+            val TAG = "getMemoryInfo";
+            val rt = Runtime.getRuntime()
+            val maxMemory = rt.maxMemory()
+            Log.e(TAG, "MaxMemory:" + java.lang.Long.toString(maxMemory / (1024 * 1024)))
+            val activityManager =
+                context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            Log.e(
+                TAG,
+                "MemoryClass:" + java.lang.Long.toString(activityManager.memoryClass.toLong())
+            )
+            Log.e(
+                TAG,
+                "LargeMemoryClass:" + java.lang.Long.toString(activityManager.largeMemoryClass.toLong())
+            )
+            Log.e(TAG, "widthPixels:" + context.getResources().getDisplayMetrics().widthPixels)
+            Log.e(
+                TAG,
+                "heightPixels:" + context.getResources().getDisplayMetrics().heightPixels
+            )
+            val info = ActivityManager.MemoryInfo()
+            activityManager.getMemoryInfo(info)
+            Log.e(TAG, "系统剩余内存:" + (info.availMem shr 10) / 1024 + "m")
+            Log.e(TAG, "系统是否处于低内存运行：" + info.lowMemory)
+            Log.e(TAG, "当系统剩余内存低于" + (info.threshold shr 10) / 1024 + "m时就看成低内存运行")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun testChannel() {
+        val  chanel = Channel<String>(2)
+        scope.launch {
+            for (value in 0..9){
+                delay(100)
+                chanel.send("发送：$value")
+                Log.d("testChannel","发送:" + value)
+                if (value == 5){
+                    chanel.cancel()
+                }
+            }
+            Log.d("testChannel","发送结束----！")
+
+        }
+
+        scope.launch {
+
+            repeat(20){
+                delay(500)
+                Log.d("testChannel","接收:" + chanel.receive())
+            }
+            Log.d("testChannel","接收结束--------！")
+
+        }
+
+
+        val channel = GlobalScope.produce<String> {
+
+
+        }
+
+        scope.launch {
+            for (value in channel){
+
+
+            }
+        }
+//        File("").forEachBlock(1)
+        applicationInfo.nativeLibraryDir
+    }
+
+    private fun testCoroutineScope() {
+        runBlocking {
+            Log.d("testCoroutineScope","testCoroutineScope0:" + Thread.currentThread())
+            delay(1000)
+            launch {
+                Log.d("testCoroutineScope","testCoroutineScope1:" + Thread.currentThread())
+                delay(2000)
+                Log.d("testCoroutineScope","testCoroutineScope2:" + Thread.currentThread())
+            }
+
+            launch {
+                Log.d("testCoroutineScope","testCoroutineScope3:" + Thread.currentThread())
+                delay(2000)
+                Log.d("testCoroutineScope","testCoroutineScope4:" + Thread.currentThread())
+            }
+            try {
+                val result = suspendTest();
+                Log.d("testCoroutineScope", "suspendTest:$result")
+            }catch (e:Exception){
+                Log.d("testCoroutineScope","suspendTest Exception:" + e.message)
+            }
+            Log.d("testCoroutineScope","testCoroutineScope5:" + Thread.currentThread())
+
+        }
+
+
+
+
+
+        val  job = Job()
+        val coroutine =  CoroutineScope(job)
+        coroutine.launch {
+
+            val  ret = withContext(Dispatchers.IO){
+                delay(1000)
+                Log.d("testCoroutineScope","testCoroutineScopeRet:" + Thread.currentThread())
+                12313123
+            }
+            Log.d("testCoroutineScope","testCoroutineScopeRet:" + ret)
+        }
+        Log.d("testCoroutineScope","testCoroutineScope6:" + Thread.currentThread())
+
+
+
+    }
+
+
+    private suspend fun suspendTest():String = suspendCoroutine {
+        it.resumeWithException(IllegalArgumentException("参数错误"))
+    }
+
+    private suspend fun testFlow() {
+
+        val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+            Log.d("testFlow","协程异常：" + throwable)
+        }
+        GlobalScope.launch(exceptionHandler) {
+                1/0
+        }
+
+
+        try {
+            //如果block中执行时间超过了10毫秒，那么就会抛出异常，如果不捕获异常，那么当下的整个协程都会停止
+            val ret = withTimeout(10){
+                Log.d("testFlow","超时block")
+                delay(200)
+                "1231"
+            }
+        }catch (e:Exception){
+            Log.d("testFlow","超时开始:" + e.message)
+
+        }
+
+
+        //https://blog.csdn.net/qq_39037047/article/details/121889740
+        //https://www.jianshu.com/p/34cdf688920f
+        val stateFlow = MutableStateFlow <String>("MutableStateFlow初始化")
+        val emptyFlow = emptyFlow<String>()
+
+        var flow = flow<String> {
+            Log.d("testFlow","发送数据中....")
+            emit("hello1")
+            emit("hello2")
+            emit("hello3")
+        }.map {
+            it
+        }
+        handle.postDelayed({
+            scope.launch {
+                flow.collect {
+                    Log.d("testFlow",it)
+                }
+                stateFlow.value = "新值"
+            }
+        },1000)
+
+
+
+        val job = scope.launch {
+            stateFlow.collect {
+                Log.d("testFlow","stateFlow:" + it)
+            }
+
+            delay(1)
+            async(start = CoroutineStart.LAZY) {
+
+            }
+
+
+        }
+
+
+        val list = ArrayList<String>()
+        list.asFlow()
+
+        immutableListOf("")
+
+        scope.launch {
+            flow.collectIndexed { index, value ->
+                Log.d("testFlow","stateFlow:" + index + " value:" + value)
+            }
+        }
+
+
+
+
+
+        val array = arrayListOf<String>();
+        scope.launch {
+            flow.toCollection(array)
+            array.forEach {
+                Log.d("testFlow","toCollection:" + it)
+            }
+
+            val result = flow.fold("") { resut, value ->
+                resut + value
+            }
+
+
+//            flow = flow.onStart {
+//                Log.d("testFlow","onStart")
+//            }
+//
+//            flow = flow.onCompletion {
+//                Log.d("testFlow","onCompletion")
+//            }
+            Log.d("testFlow","toCollection result:" + result)
+            flow.toList().forEach {
+                Log.d("testFlow","toList:" + it)
+            }
+
+
+        }
+
+
+        flow = flow.onEach {
+            Log.d("testFlow","onEach:" + it)
+        }
+
+        scope.launch {
+            flow.flowOn(Dispatchers.Main).map {
+                "map+" + it
+            }.collect {
+                Log.d("testFlow","map:" + it)
+            }
+
+           val reduce = flow.reduce { accumulator, value ->
+                accumulator + value
+            }
+            Log.d("testFlow","reduce:" + reduce)
+        }
+
+        val reduce = flow.reduce { accumulator, value ->
+            accumulator + value
+        }
+
+
+
+    }
+
+    private fun testLiveData() {
+        val  send = MutableLiveData<String>();
+        val  send1 = MutableLiveData<String>()
+        val mediatorLiveData = MediatorLiveData<String>()
+
+
+        val  receive =  Transformations.map(send,{
+            it + "已经装换了"
+        })
+
+        val get = fun(it: String){
+            Log.d("mediatorLiveData","内容:" +it)
+            mediatorLiveData.value =  "收集后二次发送:${it}"
+        }
+
+        val switch = Transformations.switchMap(send,{
+            send1
+        })
+
+        mediatorLiveData.addSource(receive,get)
+        mediatorLiveData.addSource(switch,get)
+
+        mediatorLiveData.observe(this,object :androidx.lifecycle.Observer<String>{
+            override fun onChanged(t: String?) {
+                Log.d("mediatorLiveData","observe 内容" +t)
+            }
+
+        })
+        send.value = "第一次发送"
+        send1.value = "第二个发送"
+        scope.launch {
+            delay(4000)
+            send.value = "第3次发送"
+            send1.value = "第4个发送"
+            Log.d("mediatorLiveData","来到了协程")
+        }
+
+
+//        val m = MediaPlayer();
+//        val  playbackParams = PlaybackParams()
+//        m.playbackParams = playbackParams
+//        playbackParams.setSpeed()
+
+        val  link = LinkedList<String>();
+
+
+    }
+
+
+
+    private fun initDsl() {
+        var  inout = findViewById<EditText>(R.id.input);
+        inout.addTextChangedListenerDsl {
+            afterTextChanged {
+                Log.i("addTextChangedListener",it.toString());
+            }
+
+            beforeTextChanged{ str,_,_,_->
+                Log.i("addTextChangedListener","beforeTextChanged${str}");
+            }
+        }
+
+
+
     }
 
     fun startResultActivity(){
@@ -236,7 +579,7 @@ class MainActivity : AppCompatActivity() {
             }
         }).map { it + " 在哪里？" }
             .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.newThread()).subscribe(object : Observer<String> {
+            .observeOn(Schedulers.newThread()).subscribe(object : io.reactivex.rxjava3.core.Observer<String> {
             override fun onSubscribe(d: Disposable?) {
                 Log.d("testRxjava", "onSubscribe")
             }
@@ -298,6 +641,7 @@ class MainActivity : AppCompatActivity() {
 
         })
     }
+
 
     fun testGlide(){
 
@@ -408,6 +752,7 @@ class MainActivity : AppCompatActivity() {
 
 
 }
+
 
 
 
