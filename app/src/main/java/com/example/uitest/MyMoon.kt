@@ -63,7 +63,7 @@ class MyMoon: View {
                 super.onDraw(canvas)
 
                 // 黑色背景上面画了个橙色的正圆
-                canvas.drawColor(ContextCompat.getColor(context!!, android.R.color.black))
+                canvas.drawColor(ContextCompat.getColor(context, android.R.color.black))
                 val rectF = RectF(0f, 0f, width.toFloat(), height.toFloat())
                 paint.color = ContextCompat.getColor(context!!, android.R.color.holo_orange_light)
                 val radius = Math.min(width, height) * 0.3f

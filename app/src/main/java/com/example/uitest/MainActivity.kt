@@ -9,9 +9,12 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Choreographer
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
@@ -22,6 +25,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.DrawableImageViewTarget
 import com.bumptech.glide.request.target.Target
 import com.example.uitest.resultapi.CustomActivityResultContract
+import com.example.uitest.spannableString.buildSpannableString
 import io.reactivex.rxjava3.core.*
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -60,9 +64,19 @@ class MainActivity : AppCompatActivity() {
 
         ivSceenCap = findViewById(R.id.iv_sceenCap)
         moon = findViewById(R.id.moon)
-        findViewById<View>(R.id.toList).setOnClickListener {
+        val toList = findViewById<TextView>(R.id.toList);
+        toList.setOnClickListener {
             Intent(MainActivity@this,ListActivity4::class.java).apply {
                 startActivity(this)
+            }
+        }
+
+        toList.buildSpannableString {
+            addText("测试"){
+                setColor("#FF0000")
+                onClick {
+                    Toast.makeText(baseContext,"hello",Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -151,8 +165,7 @@ class MainActivity : AppCompatActivity() {
 
         val thread = thread(start = true) {
             Log.d("testFlow","thread run")
-            val ee = 1/0;
-
+//            val ee = 1/0;
         }
         thread.setUncaughtExceptionHandler { t, e ->
             Log.d("testFlow","thread:" + e.message )
@@ -160,6 +173,19 @@ class MainActivity : AppCompatActivity() {
 
         testChannel();
         getMemoryInfo(this)
+        initChoreographer()
+    }
+
+
+    private val  callBack:Choreographer.FrameCallback = object : Choreographer.FrameCallback {
+        override fun doFrame(frameTimeNanos: Long) {
+            "刷新了${frameTimeNanos}".logD()
+            Choreographer.getInstance().postFrameCallback(this)
+        }
+    }
+
+    private fun initChoreographer() {
+        Choreographer.getInstance().postFrameCallback(callBack)
     }
 
 
