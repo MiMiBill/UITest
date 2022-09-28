@@ -70,6 +70,11 @@ class MainActivity : AppCompatActivity() {
                 startActivity(this)
             }
         }
+        findViewById<View>(R.id.to_mainActivity4).setOnClickListener {
+            Intent(MainActivity@this,MainActivity4::class.java).apply {
+                startActivity(this)
+            }
+        }
 
         toList.buildSpannableString {
             addText("测试"){

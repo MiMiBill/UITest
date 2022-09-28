@@ -16,7 +16,6 @@ class Utils private constructor(){
         }
     }
 
-
     public fun screenCapByDrawing(view:View) :Bitmap{
         view.measure(View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED),View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED));
         view.layout(0,0,view.measuredWidth,view.measuredHeight)
