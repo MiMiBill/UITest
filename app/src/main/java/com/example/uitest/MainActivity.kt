@@ -24,6 +24,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.DrawableImageViewTarget
 import com.bumptech.glide.request.target.Target
+import com.example.uitest.fish.FishActivity
 import com.example.uitest.resultapi.CustomActivityResultContract
 import com.example.uitest.spannableString.buildSpannableString
 import io.reactivex.rxjava3.core.*
@@ -67,6 +68,11 @@ class MainActivity : AppCompatActivity() {
         val toList = findViewById<TextView>(R.id.toList);
         toList.setOnClickListener {
             Intent(MainActivity@this,ListActivity4::class.java).apply {
+                startActivity(this)
+            }
+        }
+        findViewById<View>(R.id.to_fish).setOnClickListener {
+            Intent(MainActivity@this,FishActivity::class.java).apply {
                 startActivity(this)
             }
         }

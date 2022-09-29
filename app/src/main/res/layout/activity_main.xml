@@ -37,10 +37,22 @@
         android:id="@+id/to_mainActivity4"
         app:layout_constraintTop_toBottomOf="@id/input"
         app:layout_constraintStart_toStartOf="parent"
-        android:text="TO Activity4"
+        android:text="各种头像"
+        android:gravity="center"
         android:layout_marginTop="2dp"
         android:background="#453"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/to_fish"
+        app:layout_constraintTop_toBottomOf="@id/to_mainActivity4"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="鱼"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:background="#453"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"/>
 
     <com.example.uitest.RoundImage

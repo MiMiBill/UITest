@@ -66,6 +66,7 @@ class MainActivity4 : AppCompatActivity() {
             strokeWidth = 50f
             strokeColor = ContextCompat.getColorStateList(this@MainActivity4, R.color.red)
         }
+        (textView.parent as ViewGroup).clipChildren = false // 不限制子view在其范围内
         textView.setTextColor(Color.WHITE)
         textView.background = drawable2
 

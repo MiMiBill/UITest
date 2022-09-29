@@ -17,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UITest">
         <activity
+            android:name=".fish.FishActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity4"
             android:exported="false" />
         <activity android:name=".WaveActivity4" />
