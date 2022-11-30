@@ -25,18 +25,17 @@ class ListActivity4 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list4)
         recyclerView = findViewById(R.id.list)
-        for (index in 2..30){
+        for (index in 1..30){
             list.add(index)
         }
-        adapter = ListAdapter(list)
         recyclerView.apply {
-            this.adapter = adapter
-            LinearLayoutManager(context, RecyclerView.VERTICAL,false).also { this.layoutManager = it }
-            this.addItemDecoration(itemDecoration)
-            recyclerView
+            layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL,false)
+            addItemDecoration(itemDecoration)
+            adapter = ListAdapter(list).also {
+                ListActivity4@this.adapter = it;
+                it.notifyDataSetChanged()
+            }
         }
-
-        adapter.notifyDataSetChanged()
         var handle = Handler()
     }
 

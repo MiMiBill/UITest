@@ -13,6 +13,42 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="200dp"
-        android:layout_height="300dp"/>
+        android:layout_height="300dp"
+        tools:listitem="@layout/list_item"
+        tools:itemCount="10"
+        />
+
+
+    <LinearLayout
+        app:layout_constraintTop_toBottomOf="@id/list"
+        android:divider="@drawable/line"
+        android:showDividers="middle"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#545454"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#545454"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#545454"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#545454"
+            />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

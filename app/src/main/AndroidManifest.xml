@@ -20,7 +20,7 @@
             android:name=".fish.FishActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity4"
+            android:name=".MultiShapeHeadPortrait"
             android:exported="false" />
         <activity android:name=".WaveActivity4" />
         <activity android:name=".ListActivity4" />

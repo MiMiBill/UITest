@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.uitest.ListAdapter.*
 
-class ListAdapter constructor(var list:ArrayList<Int>): RecyclerView.Adapter<MyViewHolder>() {
+class ListAdapter constructor(val list:ArrayList<Int>): RecyclerView.Adapter<MyViewHolder>() {
 
 
 
@@ -23,7 +23,7 @@ class ListAdapter constructor(var list:ArrayList<Int>): RecyclerView.Adapter<MyV
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.name.text = "序号:${list.get(position)}"
+        holder.name.text = "序号:${list[position]}"
     }
 
     override fun getItemCount(): Int {

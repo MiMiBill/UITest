@@ -77,13 +77,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
         findViewById<View>(R.id.to_mainActivity4).setOnClickListener {
-            Intent(MainActivity@this,MainActivity4::class.java).apply {
+            Intent(MainActivity@this,WaveActivity4::class.java).apply {
                 startActivity(this)
             }
         }
 
         toList.buildSpannableString {
-            addText("测试"){
+            addText("测试列表"){
                 setColor("#FF0000")
                 onClick {
                     Toast.makeText(baseContext,"hello",Toast.LENGTH_SHORT).show()

@@ -12,7 +12,10 @@ import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.*
 
-class MainActivity4 : AppCompatActivity() {
+/**
+ * 各种形状的头像
+ */
+class MultiShapeHeadPortrait : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main4)
@@ -44,7 +47,7 @@ class MainActivity4 : AppCompatActivity() {
             })
         }.build()
         val drawable3 = MaterialShapeDrawable(shapeAppearanceModel3).apply {
-            setTint(ContextCompat.getColor(this@MainActivity4, R.color.black))
+            setTint(ContextCompat.getColor(this@MultiShapeHeadPortrait, R.color.black))
             paintStyle = Paint.Style.FILL
         }
         (textView.parent as ViewGroup).clipChildren = false // 不限制子view在其范围内
@@ -64,7 +67,7 @@ class MainActivity4 : AppCompatActivity() {
             setTint(Color.BLUE)
             paintStyle = Paint.Style.FILL_AND_STROKE
             strokeWidth = 50f
-            strokeColor = ContextCompat.getColorStateList(this@MainActivity4, R.color.red)
+            strokeColor = ContextCompat.getColorStateList(this@MultiShapeHeadPortrait, R.color.red)
         }
         (textView.parent as ViewGroup).clipChildren = false // 不限制子view在其范围内
         textView.setTextColor(Color.WHITE)
